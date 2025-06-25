@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Outlook Contact Enrichment Add-in
 
 A secure Outlook add-in that enriches email reading experience by displaying additional contact information for email senders.
@@ -127,3 +128,6 @@ Update URLs in manifest to point to your deployed instance
 Install the add-in in Outlook
 
 ![alt text](image.png)
+=======
+# eKomi_Test
+>>>>>>> b25842a59d138cfd43a8f3b412d46dce154709aa
