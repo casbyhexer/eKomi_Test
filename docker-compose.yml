@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: outlook_addon_db
+    environment:
+      POSTGRES_DB: outlook_addon
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secure_password_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - outlook_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d outlook_addon"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: outlook_addon_api
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://admin:secure_password_123@database:5432/outlook_addon
+      - JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - outlook_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Frontend/Add-in Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: outlook_addon_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - outlook_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  outlook_network:
+    driver: bridge

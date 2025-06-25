@@ -1,0 +1,12 @@
+### Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@company.com",
+    "password": "password123"
+}
+
+### Get Contact (replace TOKEN with actual token)
+GET http://localhost:3000/api/contacts/john.doe@company.com
+Authorization: Bearer YOUR_TOKEN_HERE

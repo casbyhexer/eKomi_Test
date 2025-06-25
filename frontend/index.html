@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlook Contact Enrichment Add-in</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .contact-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-info {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-item i {
+            width: 20px;
+            color: #667eea;
+        }
+
+        .info-item span {
+            color: #555;
+        }
+
+        .email-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .email-input input {
+            flex: 1;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            width: auto;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            margin-top: 1rem;
+        }
+
+        .sample-emails {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .sample-emails h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .sample-emails .email-list {
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-form">
+            <div class="header">
+                <h1><i class="fas fa-address-book"></i> Contact Enrichment</h1>
+                <p>Sign in to access contact information</p>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required value="admin@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required value="password123">
+                </div>
+
+                <button type="submit" class="btn" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Authenticating...</p>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="main-app" class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-address-book"></i> Contact Enrichment</h1>
+                <p>Lookup contact information</p>
+            </div>
+
+            <div id="alert-container-main"></div>
+
+            <div class="email-input">
+                <input type="email" id="lookup-email" placeholder="Enter email address" value="john.doe@company.com">
+                <button class="btn btn-small" id="lookup-btn">
+                    <i class="fas fa-search"></i> Lookup
+                </button>
+            </div>
+
+            <div id="contact-result"></div>
+
+            <div class="sample-emails">
+                <h4><i class="fas fa-lightbulb"></i> Sample Emails to Try:</h4>
+                <div class="email-list">
+                    john.doe@company.com • jane.smith@company.com • bob.johnson@company.com
+                    <br>alice.brown@company.com • charlie.wilson@company.com
+                </div>
+            </div>
+
+            <button class="btn logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let authToken = null;
+
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const mainApp = document.getElementById('main-app');
+        const authFormEl = document.getElementById('authForm');
+        const loginBtn = document.getElementById('login-btn');
+        const loading = document.getElementById('loading');
+        const lookupBtn = document.getElementById('lookup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Utility Functions
+        function showAlert(message, type = 'error', containerId = 'alert-container') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="alert ${type}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            loading.style.display = isLoading ? 'block' : 'none';
+            loginBtn.disabled = isLoading;
+            loginBtn.innerHTML = isLoading ? 
+                '<i class="fas fa-spinner fa-spin"></i> Signing In...' : 
+                '<i class="fas fa-sign-in-alt"></i> Sign In';
+        }
+
+        function showMainApp() {
+            loginForm.style.display = 'none';
+            mainApp.style.display = 'block';
+        }
+
+        function showLoginForm() {
+            loginForm.style.display = 'block';
+            mainApp.style.display = 'none';
+            authToken = null;
+        }
+
+        // API Functions
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+
+                authToken = data.token;
+                return data;
+            } catch (error) {
+                throw new Error(error.message || 'Network error occurred');
+            }
+        }
+
+        async function lookupContact(email) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(email)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Contact lookup failed');
+                }
+
+                return data;
+            } catch (error) {
+                throw new Error(error.message || 'Network error occurred');
+            }
+        }
+
+        // Office.js Integration (simulated if not available)
+        function initializeOfficeContext() {
+            // Try to initialize Office.js if available
+            if (typeof Office !== 'undefined') {
+                Office.onReady((info) => {
+                    if (info.host === Office.HostType.Outlook) {
+                        console.log('Office.js initialized successfully');
+                        // Could extract sender email from current message here
+                        // Office.context.mailbox.item.sender.emailAddress
+                    }
+                });
+            } else {
+                console.log('Office.js not available - running in standalone mode');
+            }
+        }
+
+        function getSenderEmail() {
+            // In a real Office add-in, this would get the sender from the current email
+            if (typeof Office !== 'undefined' && Office.context && Office.context.mailbox.item) {
+                return Office.context.mailbox.item.sender.emailAddress;
+            }
+            // Fallback for development/testing
+            return 'john.doe@company.com';
+        }
+
+        // Event Handlers
+        authFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            setLoading(true);
+
+            try {
+                const result = await login(email, password);
+                showAlert('Login successful!', 'success');
+                setTimeout(() => {
+                    showMainApp();
+                    // Auto-populate with sender email if available
+                    const senderEmail = getSenderEmail();
+                    document.getElementById('lookup-email').value = senderEmail;
+                }, 1000);
+            } catch (error) {
+                showAlert(error.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        lookupBtn.addEventListener('click', async () => {
+            const email = document.getElementById('lookup-email').value.trim();
+            
+            if (!email) {
+                showAlert('Please enter an email address', 'error', 'alert-container-main');
+                return;
+            }
+
+            if (!/\S+@\S+\.\S+/.test(email)) {
+                showAlert('Please enter a valid email address', 'error', 'alert-container-main');
+                return;
+            }
+
+            lookupBtn.disabled = true;
+            lookupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Looking up...';
+
+            try {
+                const contact = await lookupContact(email);
+                displayContactInfo(contact);
+                showAlert('Contact information retrieved successfully!', 'success', 'alert-container-main');
+            } catch (error) {
+                showAlert(error.message, 'error', 'alert-container-main');
+                document.getElementById('contact-result').innerHTML = '';
+            } finally {
+                lookupBtn.disabled = false;
+                lookupBtn.innerHTML = '<i class="fas fa-search"></i> Lookup';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            showLoginForm();
+            showAlert('Logged out successfully', 'success');
+        });
+
+        // Contact Display
+        function displayContactInfo(contact) {
+            const resultContainer = document.getElementById('contact-result');
+            resultContainer.innerHTML = `
+                <div class="contact-card">
+                    <h3><i class="fas fa-user"></i> ${contact.fullName || 'Unknown'}</h3>
+                    <div class="contact-info">
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>${contact.email}</span>
+                        </div>
+                        ${contact.jobTitle ? `
+                        <div class="info-item">
+                            <i class="fas fa-briefcase"></i>
+                            <span>${contact.jobTitle}</span>
+                        </div>
+                        ` : ''}
+                        ${contact.department ? `
+                        <div class="info-item">
+                            <i class="fas fa-building"></i>
+                            <span>${contact.department}</span>
+                        </div>
+                        ` : ''}
+                        ${contact.phoneNumber ? `
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <span>${contact.phoneNumber}</span>
+                        </div>
+                        ` : ''}
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Last updated: ${new Date(contact.lastUpdated).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Quick lookup for sample emails
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.email-list')) {
+                const text = e.target.textContent;
+                const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
+                if (emailMatch) {
+                    document.getElementById('lookup-email').value = emailMatch[0];
+                }
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.id === 'lookup-email') {
+                lookupBtn.click();
+            }
+        });
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeOfficeContext();
+            
+            // Check if user is already authenticated (in a real app, you'd check localStorage or session)
+            // For demo purposes, we start with the login form
+            showLoginForm();
+        });
+
+        // Error handling for network issues
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showAlert('An unexpected error occurred. Please try again.', 'error', 'alert-container-main');
+        });
+    </script>
+</body>
+</html>
