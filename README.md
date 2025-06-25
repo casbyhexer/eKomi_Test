@@ -1,4 +1,4 @@
-# Outlook Contact Enrichment Add-in
+# Outlook Contact Enrichment Add-On
 
 A secure Outlook add-in that enriches email reading experience by displaying additional contact information for email senders.
 
