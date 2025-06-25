@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Outlook Contact Enrichment Add-in
 
 A secure Outlook add-in that enriches email reading experience by displaying additional contact information for email senders.
