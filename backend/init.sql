@@ -1,4 +1,4 @@
--- Create users table
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create contacts table
+-- Contacts table
 CREATE TABLE IF NOT EXISTS contacts (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -17,16 +17,16 @@ CREATE TABLE IF NOT EXISTS contacts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for better performance
+-- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(email);
 
--- Insert sample user (password is 'password123')
+-- Inserted sample user (password is 'password123')
 INSERT INTO users (email, password_hash) VALUES 
 ('admin@company.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/GNxhHZ7P2')
 ON CONFLICT (email) DO NOTHING;
 
--- Insert sample contacts
+-- Inserted sample contacts
 INSERT INTO contacts (email, full_name, department, phone_number, job_title) VALUES 
 ('john.doe@company.com', 'John Doe', 'Engineering', '+1-555-0123', 'Senior Software Engineer'),
 ('jane.smith@company.com', 'Jane Smith', 'Marketing', '+1-555-0124', 'Marketing Manager'),

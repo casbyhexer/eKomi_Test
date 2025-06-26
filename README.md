@@ -90,7 +90,7 @@ Content-Type: application/json
 ### Get Contact
 
 GET http://localhost:3000/api/contacts/john.doe@company.com
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer [YOUR_TOKEN_HERE](https://jwt.io/)
 Architecture
 ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
 │ │ │ │ │ │
@@ -127,7 +127,11 @@ Upload manifest.xml to your Office 365 admin center
 Update URLs in manifest to point to your deployed instance
 Install the add-in in Outlook
 
-![alt text](image.png)
-=======
-# eKomi_Test
->>>>>>> b25842a59d138cfd43a8f3b412d46dce154709aa
+![!\[alt text\]c:\Users\luwan\OneDrive\Desktop\Casby_Outlook_AddIn\sign_in.png](sign_in.png)
+
+# Sources Used
+
+https://www.geeksforgeeks.org/node-js/jwt-authentication-with-node-js/
+
+https://jwt.io/
+

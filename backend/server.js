@@ -86,7 +86,7 @@ const initializeDatabase = async () => {
       )
     `);
 
-    // Insert sample data if tables are empty
+    // Inserted sample data if tables are empty
     const userCount = await client.query('SELECT COUNT(*) FROM users');
     if (parseInt(userCount.rows[0].count) === 0) {
       const hashedPassword = await bcrypt.hash('password123', 12);
@@ -221,7 +221,7 @@ app.get('/api/contacts/:email', verifyToken, async (req, res) => {
   }
 });
 
-// Get all contacts (for testing/admin purposes)
+// Gets all contacts (for testing/admin purposes)
 app.get('/api/contacts', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
